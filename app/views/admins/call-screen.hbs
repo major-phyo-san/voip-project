@@ -1,0 +1,190 @@
+{{> navbar}}
+
+<div id="layoutSidenav">
+    {{> sidebar}}
+    <div id="layoutSidenav_content">
+        <main id="admin-call-screen">
+            <div class="container-fluid">
+                <h1 class="mt-4">Call Screen</h1>
+                <div>
+                    <button id="accept-button" disabled onclick="acceptIncomingCall()">Accept</button>
+                    <button id="reject-button" disabled onclick="rejectIncomingCall()">Reject</button>
+                </div>
+                <div id="call-screens-container" hidden>
+                    <h4>Local video</h4>
+                    <div id="local-stream-container"></div>
+            
+                    <h4>Remote video</h4>
+                    <div id="remote-stream-container"></div>
+                </div>
+            
+            </div>
+        </main>
+        {{> footer}}
+    </div>
+</div>
+
+<script>
+    function listenIncomingCall(){
+        console.log('listening incoming call');
+        const evtSrc = new EventSource('/api/admins/subscribe/incoming-call');
+
+        evtSrc.onopen = function (event) {
+            console.log('incoming call connection opened');
+        }
+
+        evtSrc.onmessage = function (messageEvt) {
+            receivedData = JSON.parse(messageEvt.data);
+
+            console.log(receivedData);
+            if(receivedData.message === 'ringing'){
+                $('#accept-button').attr('disabled', false);
+                $('#reject-button').attr('disabled', false);
+            }
+        }
+    }
+
+    function acceptIncomingCall(){
+        $.ajax({
+            url: '/api/admins/answer-call',
+            method: 'POST',
+            data: {
+                answer: 'accept'
+            },
+            success: function (result){
+                console.log(result.data);
+                channelCredentials = result.data;
+                // extract the channel credentials from result
+                // make video call
+                $('#call-screens-container').attr('hidden', false);
+                makeVideoCall(channelCredentials);
+                $('#accept-button').attr('disabled', true);
+                $('#reject-button').attr('disabled', true);
+                
+            }
+        });
+    }
+
+    function makeVideoCall(channelCredentials){
+        let handleError = function(err){
+            console.log('error', err);
+        };
+
+        let remoteContrainer = document.getElementById("remote-stream-container");
+
+        let addVideoStream = function(elementId){            
+            let streamDiv = document.createElement("div");
+            streamDiv.id = elementId;
+            streamDiv.style.transform = "rotateY(180deg)";
+            remoteContrainer.appendChild(streamDiv);
+            console.log('video stream added');
+        };
+
+        let removeVideoStream = function(elementId){
+            let remoteDiv = document.getElementById(elementId);
+            if (remoteDiv) remoteDiv.parentNode.removeChild(remoteDiv);
+            console.log('video stream removed');
+        };
+
+        let client = AgoraRTC.createClient({
+            "mode": "rtc",
+            "codec": "vp8"
+        });
+
+        client.init(channelCredentials.agora_id);
+        client.join(channelCredentials.channel_token, channelCredentials.channel_name, null, function(uid){
+            let localStream = AgoraRTC.createStream({
+                "audio": true,
+                "video": true
+            });
+            localStream.init(function(){
+                console.log('playing local stream');
+                localStream.play('local-stream-container');
+                client.publish(localStream, handleError);
+            });
+        }, handleError);
+
+        client.on('stream-added', function(evt){
+            client.subscribe(evt.stream, handleError);
+        });
+
+        client.on('stream-subscribed', function(evt){
+            changeBusy();
+            let stream = evt.stream;
+            let streamId = String(stream.getId());
+            console.log('playing remote stream');
+            // addVideoStream(streamId);
+            stream.play('remote-stream-container');
+        });
+
+        client.on('peer-leave', function(evt){
+            let stream = evt.stream;
+            let streamId = String(stream.getId());
+            stream.close();
+            removeVideoStream(streamId);
+            client.unsubscribe(evt.stream, handleError);
+            client.leave();
+            $('#call-screens-container').attr('hidden', true);
+            changeOnline();
+        });
+    }
+
+    function rejectIncomingCall(){
+        $.ajax({
+            url: '/api/admins/answer-call',
+            method: 'POST',
+            data: {
+                answer: 'reject'
+            },
+            success: function (result){
+                console.log('call rejected');
+                $('#accept-button').attr('disabled', true);
+                $('#reject-button').attr('disabled', true);
+            }
+        });
+    }
+
+    function changeOnline() {
+        $.ajax({
+            url: '/api/admins/change-online-status',
+            method: 'PUT',
+            data: {
+                admin_id: '{{user._id}}',
+                name: '{{user.name}}',
+                status: "online"
+            },
+            success: function (result) {
+            }
+        });
+    }
+
+    function changeOffline() {
+        $.ajax({
+            url: '/api/admins/change-online-status',
+            method: 'PUT',
+            data: {
+                admin_id: '{{user._id}}',
+                name: '{{user.name}}',
+                status: "offline"
+            },
+            success: function (result) {
+
+            }
+        });
+    }
+
+    function changeBusy(){
+        $.ajax({
+            url: '/api/admins/change-online-status',
+            method: 'PUT',
+            data: {
+                admin_id: '{{user._id}}',
+                name: '{{user.name}}',
+                status: "busy"
+            },
+            success: function (result) {
+
+            }
+        }); 
+    }
+</script>

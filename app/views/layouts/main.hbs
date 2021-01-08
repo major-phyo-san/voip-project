@@ -1,0 +1,62 @@
+<!doctype html>
+{{#if lang}}
+<html lang={{lang}}>
+{{else}}
+<html lang="en">
+{{/if}}
+
+<head>
+  <!-- Google Analytics -->
+    {{!-- <script>
+    //window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-XXXXX-Y', 'auto');
+    ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script> --}}
+  <!-- End Google Analytics -->
+
+  <meta charset="utf-8">  
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{csrfToken}}">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  
+  <!-- Manifest and color theme for PWAs -->
+  {{!-- <meta name="theme-color" content="#fafafa">
+  <link rel="manifest" href="manifest.json" type="application/json"> --}}
+
+  <!-- Place favicon.ico in the root of images directory -->
+  {{!-- <link rel="icon" href="/public/images/favicon.png" type="image/png"> --}}  
+
+  <!-- Stylesheets section -->
+  <link rel="stylesheet" href="/public/stylesheets/style.css" type="text/css">
+  <link rel="stylesheet" href="/public/stylesheets/vendor/normalize-8.0.1.css" type="text/css">
+  <link rel="stylesheet" href="/public/stylesheets/callscreen.css" type="text/css">
+
+  <!-- Scripts section -->
+  <script src="/public/javascripts/vendor/modernizr-3.11.2.min.js"></script>  
+  <script src="/public/javascripts/vendor/font-awesome-5.15.1.all.min.js"></script>  
+  <script src="/public/javascripts/vendor/jQuery-3.5.1.min.js"></script>
+  <script src="/public/javascripts/vendor/AgoraRTCSDK-3.3.1.js"></script>
+
+  {{!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/js/all.min.js" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.agora.io/sdk/release/AgoraRTCSDK-3.3.1.js" crossorigin="anonymous"></script> --}}
+  <title>VoIP App</title>
+</head>
+
+<body class="sb-nav-fixed" onload="changeOnline(); listenIncomingCall()" onunload="changeOffline()">
+
+  {{{body}}}
+
+  <script src="/public/javascripts/vendor/bootstrap-4.5.3.bundle.min.js"></script>
+  {{!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+    crossorigin="anonymous"></script> --}}
+  <script src="/public/javascripts/main.js"></script>
+</body>
+
+</html>

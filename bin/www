@@ -1,0 +1,142 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+const app = require('../server');
+const debug = require('debug')('boilerplate:server');
+const cluster = require('cluster');
+
+// environment variables
+const envs = require('../config/server-env');
+
+/**
+ * Get host and port from environment and set the application url in Express.
+ */
+
+const port = normalizePort(envs.NODE_PORT || '3000');
+const host = envs.NODE_HOST || 'localhost';
+
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  //var addr = server.address();
+  const addr = host;
+  const bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+// start the server
+function startServer(port, host){
+  const url = envs.NODE_PROTOCOL + host + ':' + port;
+  app.set('url', url);
+  /**
+   * Create HTTP server.
+   */
+  // HTTP server for the app is created as app.server in the server.js file
+
+  /**
+   * Listen on provided host and port, on all network interfaces.
+   */  
+
+  app.server.listen(port, host, function () {    
+    console.log('Server running in ' + app.get('env') + ' mode on ' + app.get('url'));
+  });
+  app.server.on('error', onError);
+  app.server.on('listening', onListening);  
+}
+
+// start the server on every CPU core
+function startServerInCluster(){  
+  if(cluster.isMaster){
+    require('os').cpus().forEach(function () {
+      startWorker();
+    });
+
+    // log the disconnected worker, it will then be existed from the cluster
+    cluster.on('disconnect', function(worker){
+      if(envs.NODE_ENV === 'development'){
+        console.log(`CLUSTER: worker ${worker.id} disconnected from the cluster`);
+      }
+    });
+
+    // an old worker dies (exits) from the cluster
+    cluster.on('exit', function(worker, code, signal){
+      if(envs.NODE_ENV === 'development'){
+        console.log(`CLUSTER: worker ${worker.id} died with exit code ${code} ${signal}`);
+      }
+
+      // a new worker is created to replace it
+      startWorker();
+    });
+  }
+  else{
+    // start the server on a worker
+    startServer(port, host);
+  }
+  
+}
+
+// create a worker in the cluster
+function startWorker(){
+  const worker = cluster.fork();
+  if(envs.NODE_ENV === 'development'){
+    console.log(`CLUSTER: worker ${worker.id} started`);
+  }
+}
+
+if(process.argv[2] === 'cluster'){
+  startServerInCluster();
+}
+else{
+  startServer(port, host);  
+}

@@ -1,0 +1,16 @@
+#local-stream-container{
+    position: relative;
+    width: 50%;
+    margin: 0 auto;
+    display: block;
+}
+#local-stream-container video{
+    position: relative !important;
+}
+#remote-stream-container{
+    display: flex;
+}
+#remote-stream-container video{
+    height: auto;
+    position: relative !important;
+}

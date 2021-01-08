@@ -1,0 +1,5 @@
+/node_modules
+/storage/app
+/storage/app/public
+
+*.code-workspace
