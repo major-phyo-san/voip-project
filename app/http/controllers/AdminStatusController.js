@@ -75,6 +75,7 @@ module.exports.notifyMobileAdminStatus = function(req, res){
              var adminStatuses = adminStatuses.map(function(adminStatus){
                  return {
                      admin_id: adminStatus.admin_id,
+                     name: adminStatus.name,
                      status: adminStatus.status
                  };
              });
