@@ -71,7 +71,13 @@ module.exports.notifyMobileAdminsAnswer = function(req, res){
             res.write(capsule);
         }
         if(message === 'reject'){
-            data = JSON.stringify({"message": "call rejected"});
+            data = JSON.stringify({
+                "message": "call rejected",
+                "data" : {
+                    channel_name: null,
+                    channel_token: null
+                }
+            });
             capsule += data + '\n\n';
             res.write(capsule);
         }
