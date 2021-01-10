@@ -32,13 +32,13 @@ const envs = require('./config/server-env');
 
 // initialize Express app and create server for the app
 const app = express();
-// var serverOptions = {
-//     key: fs.readFileSync(__dirname + '/ssl/localtesting.lan.key'),
-//     cert: fs.readFileSync(__dirname + '/ssl/localtesting.lan.crt')
-// };
-// app.server = https.createServer(serverOptions, app);
+var serverOptions = {
+    key: fs.readFileSync(__dirname + '/ssl/localtesting.lan.key'),
+    cert: fs.readFileSync(__dirname + '/ssl/localtesting.lan.crt')
+};
+app.server = https.createServer(serverOptions, app);
 
-app.server = http.createServer(app);
+// app.server = http.createServer(app);
 
 // set app environment
 app.set('env', envs.NODE_ENV);
