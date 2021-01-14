@@ -19,6 +19,7 @@ router.get('/protected', authValidator.validateWebUser, function(req, res){
     res.send('authenticated user');
 });
 router.get('/admins/communication/calls', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminScreenController.callScreen);
+router.get('/admins/management/users', AdminScreenController.userManagementScreen);
 
 /* Web authentication routes */
 router.get('/login', LoginController.showLoginForm);
