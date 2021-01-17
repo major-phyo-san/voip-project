@@ -5,3 +5,20 @@
         </div>
     </div>
 </footer>
+
+<script>
+    function changeOffline() {
+        $.ajax({
+            url: '/api/admins/change-online-status',
+            method: 'PUT',
+            data: {
+                admin_id: '{{user._id}}',
+                name: '{{user.name}}',
+                status: "offline"
+            },
+            success: function (result) {
+
+            }
+        });
+    }
+</script>
