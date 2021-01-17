@@ -1,6 +1,18 @@
-var envs = require('../../../config/server-env');
 var database = require('../../../config/database');
-var auth = require('../../../config/auth');
+var User = require('../../models/User');
+
+var optionalConnectionString = {
+    authSource: 'admin',
+    compressors: 'zlib',
+    gssapiServiceName: 'mongodb'
+}
+
+var serverOptions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+};
+
+database.makeMongoDBConnection(optionalConnectionString, serverOptions);
 
 var renderContext = {};
 
@@ -12,5 +24,16 @@ module.exports.callScreen = function(req, res){
 module.exports.userManagementScreen = function(req, res){
     renderContext['user'] = req.user;
     renderContext['csrfToken'] = req.csrfToken();
-    res.render('admins/user-management', renderContext);
+    User.find(function(err, users){
+        var users = users.map(function(user){
+            return{
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+        renderContext['users'] = users;
+        res.render('admins/user-management', renderContext);
+    });    
 }
