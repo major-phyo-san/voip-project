@@ -24,11 +24,12 @@ router.get('/api/protected', authValidator.validateAPIUser, function(req, res){
 /* API authentication route */
 router.post('/api/login', auth.makeJWTAuth);
 
-//router.put('/api/admins/change-online-status', authValidator.validateAPIUser, apiUserGuard.adminsOnly, AdminStatusController.changeStatus);
+/* internal api calls from admins */
 router.put('/api/admins/change-online-status', AdminStatusController.changeStatus);
 router.get('/api/admins/subscribe/incoming-call', AdminRingingController.notifyAdminRinging);
 router.post('/api/admins/answer-call', AdminAnswersCallController.answerCall);
 
+/* mobile api calls */
 router.get('/api/mobile/subscribe/online-status', authValidator.validateAPIUser, AdminStatusController.notifyMobileAdminStatus);
 router.get('/api/mobile/subscribe/online-status/initial', authValidator.validateAPIUser, AdminStatusController.notifyMobileInitialAdminStatus);
 router.post('/api/mobile/call-admin', authValidator.validateAPIUser, AdminRingingController.ringAdmin);
