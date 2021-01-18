@@ -29,9 +29,9 @@ router.put('/api/admins/change-online-status', AdminStatusController.changeStatu
 router.get('/api/admins/subscribe/incoming-call', AdminRingingController.notifyAdminRinging);
 router.post('/api/admins/answer-call', AdminAnswersCallController.answerCall);
 
-router.get('/api/mobile/subscribe/online-status', AdminStatusController.notifyMobileAdminStatus);
-router.get('/api/mobile/subscribe/online-status/initial', AdminStatusController.notifyMobileInitialAdminStatus);
-router.post('/api/mobile/call-admin', AdminRingingController.ringAdmin);
-router.get('/api/mobile/subscribe/call-answer', AdminAnswersCallController.notifyMobileAdminsAnswer);
+router.get('/api/mobile/subscribe/online-status', authValidator.validateAPIUser, AdminStatusController.notifyMobileAdminStatus);
+router.get('/api/mobile/subscribe/online-status/initial', authValidator.validateAPIUser, AdminStatusController.notifyMobileInitialAdminStatus);
+router.post('/api/mobile/call-admin', authValidator.validateAPIUser, AdminRingingController.ringAdmin);
+router.get('/api/mobile/subscribe/call-answer', authValidator.validateAPIUser, AdminAnswersCallController.notifyMobileAdminsAnswer);
 
 module.exports = router;
