@@ -1,22 +1,7 @@
 {
-  "name": "julia-framework",
-  "version": "0.1.0",
-  "description": "Julia is an Express based Node.js framework inspired by Laravel for developing MVC style Web apps",
-  "keywords": [
-    "node.js",
-    "express.js",
-    "mvc-framework",
-    "node-framework",
-    "mvc-pattern"
-  ],
-  "homepage": "https://github.com/major-phyo-san/julia-framework#readme",
-  "license": "Apache-2.0",
-  "author": {
-    "name": "Phyo Kyaw San (aka Major San)",
-    "email": "phyojupiter9@gmail.com",
-    "url": "https://facebook.com/major.phyosan"
-  },
-  "private": false,
+  "name": "voip-app",
+  "version": "0.0.1",
+  "description": "",
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
