@@ -88,8 +88,8 @@
                                     </form>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>                                    
-                                    <input type="submit" class="btn btn-info" data-dismiss="modal" id="add-user-submit-btn" form="add-user-form" value="Add" disabled/>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>                              
+                                    <button type="button" class="btn btn-info" data-dismiss="modal" id="add-user-submit-btn" disabled>Add</button>
                                 </div>
                             </div>
                         </div>
@@ -194,6 +194,10 @@
         $(document).on('click', '#confirm-edit-user-btn', function(){
             $('#edit-user-form').attr('action', urlWithId);
             $('#edit-user-form').submit();
+        });
+
+        $(document).on('click', '#add-user-submit-btn', function(){
+            $('#add-user-form').submit();
         });
 
         function validatePassword(){
