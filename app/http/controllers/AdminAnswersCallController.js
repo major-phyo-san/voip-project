@@ -35,23 +35,21 @@ module.exports.answerCall = function(req, res){
         uid = numberGenerator.generateRandomInt(100000, 999999);
         channel = stringGenerator.generateRandomString(10);
         superagent.get('https://pks-test-token.herokuapp.com/access_token')
-        .query({"channel": channel, "uid": uid})
+        .query({"channel": channel, "uid": 0})
         .end(function(err, superres){
             var channelCredentials = {};
             if(err){
                 channelCredentials = {
                     "agora_id": agoraAppId,
                     "channel_name": "",
-                    "channel_token": "",
-                    "channel_uid": ""
+                    "channel_token": ""                    
                 };
             }
             else{
                 channelCredentials = {
                     "agora_id": agoraAppId,
                     "channel_name": channel,
-                    "channel_token": superres.body.token,
-                    "channel_uid": uid
+                    "channel_token": superres.body.token                   
                 };
             }
 
@@ -59,8 +57,7 @@ module.exports.answerCall = function(req, res){
                 "data": {
                     "agora_id": agoraAppId,
                     "channel_name": channelCredentials.channel_name,
-                    "channel_token": channelCredentials.channel_token,
-                    "channel_uid": uid
+                    "channel_token": channelCredentials.channel_token                    
                 }
             };
             adminAnswerEvent.emit('answer', 'accept', channelCredentials);
