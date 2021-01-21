@@ -57,7 +57,10 @@ module.exports.answerCall = function(req, res){
 
             envelope = {
                 "data": {
-                    channelCredentials
+                    "agora_id": agoraAppId,
+                    "channel_name": channelCredentials.channel_name,
+                    "channel_token": channelCredentials.channel_token,
+                    "channel_uid": uid
                 }
             };
             adminAnswerEvent.emit('answer', 'accept', channelCredentials);
