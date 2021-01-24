@@ -1,16 +1,10 @@
 var database = require('../../../config/database');
 var Event = require('events');
 var stringGenerator = require('../../../utilities/stringGenerators');
-var numberGenerator = require('../../../utilities/numberGenerators');
 
 var envs = require('../../../config/server-env');
-const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+
 const agoraAppId = envs.AGORA_APP_ID;
-const agoraAppCertificate = envs.AGORA_APP_CERTIFICATE;
-const channelName = stringGenerator.generateRandomString(10);
-const uId = 0;
-const role = RtcRole.SUBSCRIBER;
-const privilegeExpireTime = Math.floor(Date.now() / 1000) + 3600;
 
 const superagent = require('superagent');
 
@@ -32,10 +26,10 @@ var adminAnswerEvent = new Event();
 module.exports.answerCall = function(req, res){
     if(req.body.answer === 'accept'){
         // fire accept call event with channel credentials
-        uid = numberGenerator.generateRandomInt(100000, 999999);
+        uid = 0;
         channel = stringGenerator.generateRandomString(10);
         superagent.get('https://pks-test-token.herokuapp.com/access_token')
-        .query({"channel": channel, "uid": 0})
+        .query({"channel": channel, "uid": uid})
         .end(function(err, superres){
             var channelCredentials = {};
             if(err){
