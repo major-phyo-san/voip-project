@@ -10,12 +10,52 @@
                     <button id="accept-button" disabled onclick="acceptIncomingCall()">Accept</button>
                     <button id="reject-button" disabled onclick="rejectIncomingCall()">Reject</button>
                 </div>
-                <div id="call-screens-container" hidden>
+                {{!-- <div id="call-screens-container" hidden>
                     <h4>Local video</h4>
                     <div id="local-stream-container"></div>
             
                     <h4>Remote video</h4>
                     <div id="remote-stream-container"></div>
+                </div> --}}
+
+                <div id="container">
+                    <div id="main-container">
+                        <div id="butttons-container" class="row justify-content-center mt-3">
+                            <div class="col-md-2 text-center">
+                                <button id="mic-btn" type="button" class="btn btn-block btn-dark btn-sm">
+                                    <i id="mic-icon" class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <button id="video-btn" type="button" class="btn btn-block btn-dark btn-sm">
+                                    <i id="video-icon" class="fas fa-video"></i>
+                                </button>
+                            </div>
+                             <div class="col-md-2 text-center">
+                                <button id="exit-btn" type="button" class="btn btn-block btn-dark btn-sm">
+                                    <i id="exit-icon" class="fas fa-phone-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="lower-video-bar">
+                            <div id="remote-streams-container">
+                                <div id="remote-streams">
+                                    <div>
+                                        remote videos
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="local-stream-container" class="local-stream-container">
+                                <div id="local-video" hidden>
+
+                                </div>
+
+                            </div>
+                        </div>             
+                        
+                    </div>
                 </div>
             
             </div>
@@ -25,6 +65,215 @@
 </div>
 
 <script>
+
+    // create client instance
+    var client = AgoraRTC.createClient({
+        "mode": "rtc", 
+        "codec": "h264"
+    });
+
+    client.on('stream-published', function(event){
+
+    });
+
+    client.on('stream-added', function(event){
+        let stream = event.stream;
+        let streamId = stream.getId();
+        console.log('new stream added with ' + streamId);
+        // check if the stream is local
+        if(streamId != localStreams.screen.id){
+            console.log('trying to subscribe to remote stream: ' + streamId);
+            console.log('calling add remote mini view because of remote stream');
+            addRemoteStreamMiniView(stream);
+            // subscribe to the stream
+            client.subscribe(event.stream, function(err){
+                console.log('[ERROR] : remote stream subscription failed', err);
+            });
+        }
+    });
+
+    client.on('stream-subscribed', function(event){
+        console.log('[SUCCESS] : remote stream subscription success with ' + event.stream.getId());
+    });
+
+    client.on('peer-leave', function(event){
+        // remove the remote-container when remote user leaves the channel
+        console.log('remote stream ' + event.stream.getId() + ' has left');
+    });
+
+    client.on('mute-audio', function(event){
+        // show mute icon whenever a remote user has muted their mic
+    });
+
+    client.on('unmute-audio', function(event){
+
+    });
+
+    client.on('mute-video', function(event){
+        // show user icon whenever a remote has disabled their video
+    });
+
+    client.on('unmute-video', function(event){
+
+    });
+
+    // video profile setting
+    var cameraVideoProfile = '480p_4';
+
+    // stream references
+    var remoteStreams = {};
+
+    var localStreams = {
+        camera: {
+            "id": "",
+            "stream": {}
+        }
+    };
+
+    var localStream;
+
+    var mainStreamId;
+
+    function makeVideoCall(channelCredentials){
+        // channel credentials
+        let agoraAppId = channelCredentials.agora_id;
+        let channelToken = channelCredentials.channel_token;
+        let channelName = channelCredentials.channel_name;        
+        
+        client.init(agoraAppId, function(){
+            console.log('[SUCCESS] : client initialized');
+            joinChannel(channelToken, channelName);
+        });
+    }
+
+    function joinChannel(channelToken, channelName){
+        client.join(channelToken, channelName, null, function(uid){
+            console.log(`User $uid join channel successfully`);
+            createCameraStream(uid);
+            localStreams.camera.id = uid;
+        }, function(err){
+            console.log('[ERROR] : join channel failed', err);
+        });
+    }
+
+    function createCameraStream(uid){
+        localStream = AgoraRTC.createStream({
+            "streamId": uid,
+            "audio": true,
+            "video": true,
+            "screen": false
+        });
+        localStream.setVideoProfile(cameraVideoProfile);
+        localStream.init(function(){
+            console.log('[SUCCESS] : get user media successfully');
+            $('#local-video').attr('hidden', false);
+            // TODO: add check for other streams, play local stream full size if alone
+            localStream.play('local-video'); // play the given stream within the local-video div
+            // publish local stream
+            client.publish(localStream, function(err){
+                console.log('[ERROR] : publish local stream error: ' + err);
+            });
+
+            enableUiControls(localStream);
+            localStreams.camera.stream = localStream; // move after testing
+        }, function(err){
+            console.log('[ERROR] : get user media failed', err);
+        });
+    }
+
+    function leaveChannel(localStream){
+        client.leave(function(){
+            $('#player_undefined').remove();
+            $('#local-video').attr('hidden', true);
+            localStream.close();
+            console.log('[SUCCESS] : client has left the channel');
+        }, function(err){
+            console.log('[ERROR] : client leave failed', err);
+        });
+    }
+
+    function addRemoteStreamMiniView(remteStream){
+        console.log('adding remote stream mini view');
+        let streamId = remoteStream.getId();
+        // appedn the remote stream template to #remote-streams
+
+        $('#remote-streams').append(
+            $('<div/>', {'id': streamId + '_container', 'class': 'remote-stream-container col'}).append(
+                $('<div/>', {'id': streamId + '_mute', 'class': 'mute-overlay'}).append(
+                    $('<i/>', {'class': 'fas -fa-microphone-slash'})
+                ),
+                $('<div/>', {'id': streamId + '_no-video', 'class': 'no-video-overlay text-center'}).append(
+                    $('<i/>', {'class': 'fas fa-user'})
+                ),
+                $('<div/>', {'id': 'agora_remote_' + streamId, 'class': 'remote-video'})
+            )
+        );
+
+        remoteStream.play('agora_remote_' + streamId);
+    }
+
+    function enableUiControls(localStream){
+        $('#mic-btn').prop('disabled', false);
+        $('#video-btn').prop('disabled', false);
+        $('#exit-btn').prop('disabled', false);
+
+        $('#mic-btn').click(function(){
+            toggleMic(localStream);
+        });
+
+        $('#video-btn').click(function(){
+            toggleVideo(localStream);
+        });
+
+        $('#exit-btn').click(function(){
+            console.log('leaving channel');
+            leaveChannel(localStream);
+        });
+    }
+
+    function toggleMic(localStream){
+        toggleBtn($('#mic-btn'));
+        $('#mic-icon').toggleClass('fa-microphone').toggleClass('fa-microphone-slash'); // toggle the mic icon
+        if($('#mic-icon').hasClass('fa-microphone')){
+            console.log('local mic enabled');
+            localStream.enableAudio(); // enable the local mic
+            toggleVisibility('#mute-overlay', false);  // hide the muted mic icon
+        }
+        else{
+            console.log('local mic disabled');
+            localStream.disableAudio(); // mute the local mic
+            toggleVisibility('#mute-overlay', true); // show the muted mic icon
+        }
+    }
+
+    function toggleVideo(localStream){
+        toggleBtn($('#video-btn'));
+        $('#video-icon').toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
+        if($('#video-icon').hasClass('fa-video')){
+            console.log('local video enabled');
+            localStream.enableVideo(); // enable the local video
+            toggleVisibility('#no-local-video', false); // hide the user icon when video is enabled
+        }
+        else{
+            console.log('local video disabled');
+            localStream.disableVideo(); // disable the local video
+            toggleVisibility('#no-local-video', true);
+        }
+    }
+
+    function toggleBtn(btn){
+        btn.toggleClass('btn-dark').toggleClass('btn-danger');
+    }
+
+    function toggleVisibility(elementId, visible){
+        if(visible){
+            $(elementId).attr('style', 'display: block');
+        }
+        else{
+            $(elementId).attr('style', 'display: none');
+        }
+    }    
+
     function listenIncomingCall(){
         console.log('listening incoming call');
         const evtSrc = new EventSource('/api/admins/subscribe/incoming-call');
@@ -64,71 +313,7 @@
                 
             }
         });
-    }
-
-    function makeVideoCall(channelCredentials){
-        let handleError = function(err){
-            console.log('error', err);
-        };
-
-        let remoteContrainer = document.getElementById("remote-stream-container");
-
-        let addVideoStream = function(elementId){            
-            let streamDiv = document.createElement("div");
-            streamDiv.id = elementId;
-            streamDiv.style.transform = "rotateY(180deg)";
-            remoteContrainer.appendChild(streamDiv);
-            console.log('video stream added');
-        };
-
-        let removeVideoStream = function(elementId){
-            let remoteDiv = document.getElementById(elementId);
-            if (remoteDiv) remoteDiv.parentNode.removeChild(remoteDiv);
-            console.log('video stream removed');
-        };
-
-        let client = AgoraRTC.createClient({
-            "mode": "rtc",
-            "codec": "vp8"
-        });
-
-        client.init(channelCredentials.agora_id);
-        client.join(channelCredentials.channel_token, channelCredentials.channel_name, null, function(uid){
-            let localStream = AgoraRTC.createStream({
-                "audio": true,
-                "video": true
-            });
-            localStream.init(function(){
-                console.log('playing local stream');
-                localStream.play('local-stream-container');
-                client.publish(localStream, handleError);
-            });
-        }, handleError);
-
-        client.on('stream-added', function(evt){
-            client.subscribe(evt.stream, handleError);
-        });
-
-        client.on('stream-subscribed', function(evt){
-            changeBusy();
-            let stream = evt.stream;
-            let streamId = String(stream.getId());
-            console.log('playing remote stream');
-            addVideoStream(streamId);
-            stream.play('remote-stream-container');
-        });
-
-        client.on('peer-leave', function(evt){
-            let stream = evt.stream;
-            let streamId = String(stream.getId());
-            stream.close();
-            removeVideoStream(streamId);
-            client.unsubscribe(evt.stream, handleError);
-            client.leave();
-            $('#call-screens-container').attr('hidden', true);
-            changeOnline();
-        });
-    }
+    }    
 
     function rejectIncomingCall(){
         $.ajax({
