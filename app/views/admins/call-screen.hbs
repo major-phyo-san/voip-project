@@ -77,15 +77,10 @@
     });
 
     client.on('stream-added', function(event){
-        let stream = event.stream;
-        let streamId = stream.getId();
         console.log('new stream added with ' + streamId);
         // check if the stream is local
         if(streamId != localStreams.screen.id){
-            console.log('trying to subscribe to remote stream: ' + streamId);
-            console.log('calling add remote mini view because of remote stream');
-            addRemoteStreamMiniView(stream);
-            // subscribe to the stream
+            // if not local, subscribe to the stream
             client.subscribe(event.stream, function(err){
                 console.log('[ERROR] : remote stream subscription failed', err);
             });
@@ -94,6 +89,8 @@
 
     client.on('stream-subscribed', function(event){
         console.log('[SUCCESS] : remote stream subscription success with ' + event.stream.getId());
+        console.log('playing remote stream');
+        addRemoteStreamMiniView(event.stream);
     });
 
     client.on('peer-leave', function(event){
