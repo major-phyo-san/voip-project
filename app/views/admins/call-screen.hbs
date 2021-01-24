@@ -40,11 +40,13 @@
 
                         <div id="lower-video-bar">
                             <div id="remote-streams-container">
-                                <div id="remote-streams">
+                                <div id="remote-video" hidden>
+                                </div>
+                                {{!-- <div id="remote-streams">
                                     <div>
                                         remote videos
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         
                             <div id="local-stream-container" class="local-stream-container">
@@ -90,7 +92,8 @@
     client.on('stream-subscribed', function(event){
         console.log('[SUCCESS] : remote stream subscription success with ' + event.stream.getId());
         console.log('playing remote stream');
-        addRemoteStreamMiniView(event.stream);
+        $('#remote-video').attr('hidden', false);
+        event.stream.play('remote-video');
     });
 
     client.on('peer-leave', function(event){

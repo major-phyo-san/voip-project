@@ -27,10 +27,17 @@
 
 #remote-streams-container{
     position: relative;
-    width: 50%;
-    height: 140px;
+    width: 80%;
+    height: 340px;
     margin: 5px auto;
     display: inline-block;
+}
+
+#remote-video{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: brown;
 }
 
 .remote-stream-container{
