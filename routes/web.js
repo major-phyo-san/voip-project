@@ -8,7 +8,7 @@ var LoginController = require('../app/http/controllers/auth/LoginController');
 var RegisterController = require('../app/http/controllers/auth/RegisterController');
 
 var AdminScreenController = require('../app/http/controllers/AdminScreenController');
-var UserCRUDController = require('../app/http/controllers/UserCRUDController');
+var AdminCRUDController = require('../app/http/controllers/AdminCRUDController');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -22,12 +22,12 @@ router.get('/protected', authValidator.validateWebUser, function(req, res){
 
 /* admin panel */
 router.get('/admins/communication/calls', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminScreenController.callScreen);
-router.get('/admins/management/users', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminScreenController.userManagementScreen);
+router.get('/admins/management/admin-users', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminScreenController.adminUserManagementScreen);
 
-/* user CRUD routes */
-router.post('/users', authValidator.validateWebUser, webUserGuard.adminsOnly, UserCRUDController.addNewUser);
-router.delete('/users/:userId', authValidator.validateWebUser, webUserGuard.adminsOnly, UserCRUDController.deleteUser);
-router.put('/users/:userId', authValidator.validateWebUser, webUserGuard.adminsOnly, UserCRUDController.updateUser);
+/* admin CRUD routes */
+router.post('/admins', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminCRUDController.addNewUser);
+router.delete('/admins/:userId', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminCRUDController.deleteUser);
+router.put('/admins/:userId', authValidator.validateWebUser, webUserGuard.adminsOnly, AdminCRUDController.updateUser);
 
 /* Web authentication routes */
 router.get('/login', LoginController.showLoginForm);
