@@ -49,8 +49,6 @@ module.exports.updateUser = function(req, res){
             var updateData = {
                 name: req.body.name,
                 email: req.body.email,
-                phone: stringGenerator.generateRandomString(10),
-                role: "admin",
                 password: hashed
             };
             User.findByIdAndUpdate(userId, updateData, function(err){
@@ -61,9 +59,7 @@ module.exports.updateUser = function(req, res){
     else{
         updateData = {
             name: req.body.name,
-            email: req.body.email,
-            phone: stringGenerator.generateRandomString(10),
-            role: "admin",
+            email: req.body.email
         };
 
         User.findByIdAndUpdate(userId, updateData, function(err){

@@ -48,9 +48,7 @@ module.exports.updateUser = function(req, res){
         cryptography.bcrypt(req.body.password, 10, function(hashed){
             var updateData = {
                 name: req.body.name,
-                email: stringGenerator.generateRandomString(10),
                 phone: req.body.phone,
-                role: "mobile",
                 password: hashed
             };
             User.findByIdAndUpdate(userId, updateData, function(err){
@@ -61,9 +59,7 @@ module.exports.updateUser = function(req, res){
     else{
         updateData = {
             name: req.body.name,
-            email: stringGenerator.generateRandomString(10),
             phone: req.body.phone,
-            role: "mobile",
         };
 
         User.findByIdAndUpdate(userId, updateData, function(err){
