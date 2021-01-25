@@ -1,5 +1,7 @@
 var database = require('../../../config/database');
 var cryptography = require('../../../utilities/cryptography');
+var stringGenerator = require('../../../utilities/stringGenerators');
+
 var User = require('../../models/User');
 
 var optionalConnectionString = {
@@ -20,13 +22,15 @@ module.exports.addNewUser = function(req, res){
         var createData = {
             name: req.body.name,
             email: req.body.email,
-            role: req.body.role,
+            phone: stringGenerator.generateRandomString(11),
+            role: "admin",
+            verified: true,
             password: hashed
         };
 
         var user = new User(createData);
         user.save(function(err, data){
-            res.redirect('/admins/management/users');
+            res.redirect('/admins/management/admin-users');
         });
     });    
 }
@@ -34,7 +38,7 @@ module.exports.addNewUser = function(req, res){
 module.exports.deleteUser = function(req, res){
     userId = req.params.userId;
     User.findByIdAndDelete(userId, function(err){
-        res.redirect('/admins/management/users');
+        res.redirect('/admins/management/admin-users');
     });
 }
 
@@ -45,11 +49,12 @@ module.exports.updateUser = function(req, res){
             var updateData = {
                 name: req.body.name,
                 email: req.body.email,
-                role: req.body.role,
+                phone: stringGenerator.generateRandomString(10),
+                role: "admin",
                 password: hashed
             };
             User.findByIdAndUpdate(userId, updateData, function(err){
-                res.redirect('/admins/management/users');
+                res.redirect('/admins/management/admin-users');
             });
         });
     }
@@ -57,11 +62,12 @@ module.exports.updateUser = function(req, res){
         updateData = {
             name: req.body.name,
             email: req.body.email,
-            role: req.body.role
+            phone: stringGenerator.generateRandomString(10),
+            role: "admin",
         };
 
         User.findByIdAndUpdate(userId, updateData, function(err){
-            res.redirect('/admins/management/users');
+            res.redirect('/admins/management/admin-users');
         });
     }
 }
