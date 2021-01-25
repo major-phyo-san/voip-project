@@ -21,10 +21,11 @@ module.exports.callScreen = function(req, res){
     res.render('admins/call-screen', renderContext);
 }
 
-module.exports.userManagementScreen = function(req, res){
+module.exports.adminUserManagementScreen = function(req, res){
     renderContext['user'] = req.user;
     renderContext['csrfToken'] = req.csrfToken();
-    User.find(function(err, users){
+    
+    User.find({role: "admin"}, function(err, users){
         var users = users.map(function(user){
             return{
                 id: user._id,
@@ -34,6 +35,6 @@ module.exports.userManagementScreen = function(req, res){
             }
         });
         renderContext['users'] = users;
-        res.render('admins/user-management', renderContext);
-    });    
+        res.render('admins/admin-management', renderContext);
+    });
 }
